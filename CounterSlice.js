@@ -1,19 +1,20 @@
 import {createSlice} from '@reduxjs/toolkit';
 
-export const counterSlice = createSlice({
+export const CounterSlice = createSlice({
     name: 'counter',
     initialState: {
         values : [
-            { id: 1, colour : '', pawn : '', takeable: '', },
+            // id, background, pawn, colour, posX, posY
         ],
         i: 0
     },
     reducers: {
         addField: (state, action) => {
-            state.values = state.values.append(action.payload);
+            const i = action.payload;
+            state.values[i.id] = i;
         }
     }
 });
 
-export const {addField} = counterSlice.actions;
-export default counterSlice.reducer;
+export const {addField} = CounterSlice.actions;
+export default CounterSlice.reducer;

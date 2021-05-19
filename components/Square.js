@@ -6,7 +6,7 @@ const Square = (props) => {
     }
     return(
         <div style={divStyle}>
-            
+            { props.pawn !='none' && <img src={props.colour + "" + props.pawn}></img>}
         </div>
     )
 }
