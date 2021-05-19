@@ -1,11 +1,11 @@
 const Square = (props) => {
     let divStyle = {
-        width: '20em',
-        height: '20em',
+        width: '10em',
+        height: '10em',
         background: props.background
     }
     return(
-        <div>
+        <div style={divStyle}>
             
         </div>
     )
