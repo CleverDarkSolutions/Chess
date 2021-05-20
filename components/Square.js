@@ -82,10 +82,61 @@ const Square = (props) => {
         return moves;
     }
 
+    const rookMoves = () => {
+        for(let i=1;i<=8;i++){
+            moves.push(findSquare(squareData.posX,i));
+            moves.push(findSquare(i,squareData.posY));
+        }
+        return moves;
+    }
+
+    const bishopMoves = () => {
+        for(let i=1;i<=8;i++){
+            moves.push(findSquare(squareData.posX + i, squareData.posY + i));
+            moves.push(findSquare(squareData.posX + i, squareData.posY - i));
+            moves.push(findSquare(squareData.posX - i, squareData.posY + i));
+            moves.push(findSquare(squareData.posX - i, squareData.posY - i));
+        }
+        return moves;
+    }
+
+    const queenMoves = () => {
+        rookMoves();
+        bishopMoves();
+        return moves;
+    }
+
+    const kingMoves = () => {
+        moves.push(findSquare(squareData.posX +1, squareData.posY + 1));
+        moves.push(findSquare(squareData.posX +1, squareData.posY - 1));
+        moves.push(findSquare(squareData.posX -1, squareData.posY - 1));
+        moves.push(findSquare(squareData.posX -1, squareData.posY + 1));
+        moves.push(findSquare(squareData.posX , squareData.posY + 1));
+        moves.push(findSquare(squareData.posX , squareData.posY - 1));
+        moves.push(findSquare(squareData.posX + 1 , squareData.posY));
+        moves.push(findSquare(squareData.posX - 1 , squareData.posY));
+    }
+
     const click = () => {
         console.log(props.id);
         console.log(squareData);
-        pawnMoves();
+        switch(props.pawn){
+            case 'pawn':
+                pawnMoves();
+                break;
+            case 'rook':
+                rookMoves();
+                break;
+            case 'bishop':
+                bishopMoves();
+                break;
+            case 'queen':
+                queenMoves();
+                break;
+            case 'king':
+                kingMoves();
+                break;
+        }
         console.log(moves);
     }
     //console.log(fetchData);
