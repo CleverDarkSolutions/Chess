@@ -27,6 +27,7 @@
 }
 
 .board {
+  user-select: none;
   width: 60em;
 }
 

@@ -1,5 +1,13 @@
 const Square = (props) => {
     let divStyle;
+    let notEmpty;
+    if (props.colour && props.pawn)
+        notEmpty = true;
+    let imgStyle = {
+        width: '5em',
+        height: '5em',
+        paddingTop: '1.5em'
+    }
     if(props.background == "white"){
     divStyle = {
         width: '7em',
@@ -16,9 +24,10 @@ const Square = (props) => {
             float: 'left'
         }
     }
+    
     return(
         <div style={divStyle}>
-            { props.pawn !='none' && <img src={props.colour + "" + props.pawn + ".jpg"}></img>}
+            { notEmpty && <img style={imgStyle} src={`../../img/${props.colour+props.pawn}.png`}></img>}
         </div>
     )
 }
