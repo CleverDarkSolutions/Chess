@@ -11,7 +11,9 @@ function App() {
 
   return (
     <div className="App">
+      <div className="board">
       <ImplementBoard></ImplementBoard>
+      </div>
     </div>
   );
 }

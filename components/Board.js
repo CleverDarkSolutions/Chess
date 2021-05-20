@@ -1,8 +1,8 @@
 import Square from './Square';
 
 const Board = (props) => {
-    const elementsToRender = props.arrayPawns.map((colour,pawn, background) => (
-        <Square background = {background} colour={colour} pawn={pawn}></Square>
+    const elementsToRender = props.arrayPawns.map((arr) => (
+        <Square background = {arr.background} colour={arr.colour} pawn={arr.pawn}></Square>
     ));
     return(
         <div>{elementsToRender}</div>
