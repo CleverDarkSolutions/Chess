@@ -82,6 +82,22 @@ const Square = (props) => {
         return moves;
     }
 
+    const knightMoves = () => {
+        moves.push(findSquare(squareData.posX - 2, squareData.posY + 1));
+        moves.push(findSquare(squareData.posX - 2, squareData.posY - 1));
+
+        moves.push(findSquare(squareData.posX + 2, squareData.posY + 1));
+        moves.push(findSquare(squareData.posX + 2, squareData.posY - 1));
+
+        moves.push(findSquare(squareData.posX - 1, squareData.posY - 2));
+        moves.push(findSquare(squareData.posX + 1, squareData.posY - 2));
+
+        moves.push(findSquare(squareData.posX - 1, squareData.posY + 2));
+        moves.push(findSquare(squareData.posX + 1, squareData.posY + 2));
+
+        return moves;
+    }
+
     const rookMoves = () => {
         for(let i=1;i<=8;i++){
             moves.push(findSquare(squareData.posX,i));
@@ -135,6 +151,9 @@ const Square = (props) => {
                 break;
             case 'king':
                 kingMoves();
+                break;
+            case 'knight':
+                knightMoves();
                 break;
         }
         console.log(moves);
