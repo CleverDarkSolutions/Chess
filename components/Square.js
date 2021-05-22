@@ -34,7 +34,7 @@ const Square = (props) => {
     }
     //-----------moves-----------------------
     const fetchData = useSelector(state => state.counter.values) // find a match between square component and redux
-    let squareData;
+    let squareData; // current square data
     let moves = []; // initial moves
     let possibleMoves = []; // after filtering
     let whoseMove = 'white';
@@ -45,7 +45,18 @@ const Square = (props) => {
             if (fetchData[i].posX == posX && fetchData[i].posY == posY)
                 return fetchData[i].id;
         }
-        return 'nan';
+        return 'error';
+    }
+
+    const clearTrash = () => {
+        for (let p = 0; p < 5; p++) { // this is weird
+            for (let i = 0; i < moves.length; i++) {
+                if (moves[i] === 'error') {
+                    moves.splice(i, 1);
+                }
+            }
+        }
+        return moves;
     }
 
     useEffect(() => {
@@ -99,15 +110,15 @@ const Square = (props) => {
     }
 
     const rookMoves = () => {
-        for(let i=1;i<=8;i++){
-            moves.push(findSquare(squareData.posX,i));
-            moves.push(findSquare(i,squareData.posY));
+        for (let i = 1; i <= 8; i++) {
+            moves.push(findSquare(squareData.posX, i));
+            moves.push(findSquare(i, squareData.posY));
         }
         return moves;
     }
 
     const bishopMoves = () => {
-        for(let i=1;i<=8;i++){
+        for (let i = 1; i <= 8; i++) {
             moves.push(findSquare(squareData.posX + i, squareData.posY + i));
             moves.push(findSquare(squareData.posX + i, squareData.posY - i));
             moves.push(findSquare(squareData.posX - i, squareData.posY + i));
@@ -123,40 +134,93 @@ const Square = (props) => {
     }
 
     const kingMoves = () => {
-        moves.push(findSquare(squareData.posX +1, squareData.posY + 1));
-        moves.push(findSquare(squareData.posX +1, squareData.posY - 1));
-        moves.push(findSquare(squareData.posX -1, squareData.posY - 1));
-        moves.push(findSquare(squareData.posX -1, squareData.posY + 1));
-        moves.push(findSquare(squareData.posX , squareData.posY + 1));
-        moves.push(findSquare(squareData.posX , squareData.posY - 1));
-        moves.push(findSquare(squareData.posX + 1 , squareData.posY));
-        moves.push(findSquare(squareData.posX - 1 , squareData.posY));
+        moves.push(findSquare(squareData.posX + 1, squareData.posY + 1));
+        moves.push(findSquare(squareData.posX + 1, squareData.posY - 1));
+        moves.push(findSquare(squareData.posX - 1, squareData.posY - 1));
+        moves.push(findSquare(squareData.posX - 1, squareData.posY + 1));
+        moves.push(findSquare(squareData.posX, squareData.posY + 1));
+        moves.push(findSquare(squareData.posX, squareData.posY - 1));
+        moves.push(findSquare(squareData.posX + 1, squareData.posY));
+        moves.push(findSquare(squareData.posX - 1, squareData.posY));
+    }
+
+    //---------------------Filter moves------------------------//
+    const filterMoves = (pawn) => {
+        switch (pawn) {
+            case "pawn":
+                for (let i = 0; i < moves.length; i++) {
+
+                    let id = moves[i];
+                    console.log(id);
+                    if (fetchData[id].posX != squareData.posX && fetchData[id].pawn != ""){
+                        console.log("First if");
+                        possibleMoves.push(id);
+                    }
+                    
+                    if (fetchData[id].posX == squareData.posX && fetchData[id].pawn == ""){
+                        console.log("Second if");
+                        possibleMoves.push(id);
+                    }
+
+                }
+                break;
+
+            case "bishop":
+                for (let i = 0; i < moves.length; i++) {
+                    let blockingPawns = []; // 0 = x, 1 = y
+
+                    let id = moves[i];
+                    if (fetchData[id].pawn != " ") { // find blocking pawns
+                        blockingPawns.push([fetchData[id].posX, fetchData[id].posY]);
+                    }
+
+                    else {
+                        for (let j = 0; j < blockingPawns.length; j++) {
+                            if (fetchData[id].posX - blockingPawns[j][0] == fetchData[id].posY - blockingPawns[j][1])
+                                continue;
+                            else
+                                possibleMoves.push(id);
+
+                        }
+                    }
+
+                }
+        }
+        return possibleMoves;
     }
 
     const click = () => {
-        console.log(props.id);
+        console.log(moves);
         console.log(squareData);
-        switch(props.pawn){
+        switch (props.pawn) {
             case 'pawn':
                 pawnMoves();
+                clearTrash();
+                filterMoves('pawn');
                 break;
             case 'rook':
                 rookMoves();
+                clearTrash();
                 break;
             case 'bishop':
                 bishopMoves();
+                clearTrash();
+                filterMoves('bishop');
                 break;
             case 'queen':
                 queenMoves();
+                clearTrash();
                 break;
             case 'king':
-                kingMoves();
+                kingMoves()
+                clearTrash();
                 break;
             case 'knight':
                 knightMoves();
+                clearTrash();
                 break;
         }
-        console.log(moves);
+        console.log("Koncowe ruchy: "+possibleMoves);
     }
     //console.log(fetchData);
 
