@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import {addMoves} from '../CounterSlice';
 
 const Square = (props) => {
     //--------------CSS mostly---------------
@@ -33,7 +34,8 @@ const Square = (props) => {
         }
     }
     //-----------moves-----------------------
-    const fetchData = useSelector(state => state.counter.values) // find a match between square component and redux
+    const fetchData = useSelector(state => state.counter.values); // find a match between square component and redux
+    const fetchGlobalMoves = useSelector(state => state.counter.globalMoves); // for king's sake
     let squareData; // current square data
     let moves = []; // initial moves
     let possibleMoves = []; // after filtering
@@ -152,12 +154,12 @@ const Square = (props) => {
 
                     let id = moves[i];
                     console.log(id);
-                    if (fetchData[id].posX != squareData.posX && fetchData[id].pawn != ""){
+                    if (fetchData[id].posX != squareData.posX && fetchData[id].pawn != "") {
                         console.log("First if");
                         possibleMoves.push(id);
                     }
-                    
-                    if (fetchData[id].posX == squareData.posX && fetchData[id].pawn == ""){
+
+                    if (fetchData[id].posX == squareData.posX && fetchData[id].pawn == "") {
                         console.log("Second if");
                         possibleMoves.push(id);
                     }
@@ -185,42 +187,132 @@ const Square = (props) => {
                     }
 
                 }
+                break;
+
+            case "rook":
+                for (let i = 0; i < moves.length; i++) {
+                    let blockingPawns = []; // 0 = x, 1 = y
+
+                    let id = moves[i];
+                    if (fetchData[id].pawn != " ") { // find blocking pawns
+                        blockingPawns.push([fetchData[id].posX, fetchData[id].posY]);
+                    }
+
+                    else {
+                        for (let j = 0; j < blockingPawns.length; j++) {
+                            if (fetchData[id].posX - blockingPawns[j][0] > 0 && fetchData[id].posY == blockingPawns[j][1])
+                                continue;
+                            else if (fetchData[id].posY - blockingPawns[j][1] > 0 && fetchData[id].posX == blockingPawns[j][0])
+                                continue;
+                            else
+                                possibleMoves.push(id);
+
+                        }
+                    }
+
+                }
+            case "queen":
+                for (let i = 0; i < moves.length; i++) {
+                    let blockingPawns = []; // 0 = x, 1 = y
+
+                    let id = moves[i];
+                    if (fetchData[id].pawn != " ") { // find blocking pawns
+                        blockingPawns.push([fetchData[id].posX, fetchData[id].posY]);
+                    }
+
+                    else {
+                        for (let j = 0; j < blockingPawns.length; j++) {
+                            if (fetchData[id].posX - blockingPawns[j][0] > 0 && fetchData[id].posY == blockingPawns[j][1])
+                                continue;
+                            else if (fetchData[id].posY - blockingPawns[j][1] > 0 && fetchData[id].posX == blockingPawns[j][0])
+                                continue;
+                            else if (fetchData[id].posX - blockingPawns[j][0] == fetchData[id].posY - blockingPawns[j][1])
+                                continue;
+                            else
+                                possibleMoves.push(id);
+
+                        }
+                    }
+
+                }
+            case "king":
+                for (let i = 0; i < moves.length; i++) {
+                    let id = moves[i];
+                    for(let j=0;j<fetchGlobalMoves.length;j++){
+                        if(id == fetchGlobalMoves[j]) // preventing walking on checks by king
+                            continue;
+                        else
+                            possibleMoves.push(id);
+                    }
+                }
+            
+
         }
         return possibleMoves;
     }
-
-    const click = () => {
-        console.log(moves);
-        console.log(squareData);
-        switch (props.pawn) {
+    const finalMoves = (pawn) => {
+        switch (pawn) {
             case 'pawn':
                 pawnMoves();
                 clearTrash();
                 filterMoves('pawn');
+                dispatch(addMoves(possibleMoves) );
                 break;
             case 'rook':
                 rookMoves();
                 clearTrash();
+                filterMoves('rook');
+                dispatch(addMoves(possibleMoves));
                 break;
             case 'bishop':
                 bishopMoves();
                 clearTrash();
                 filterMoves('bishop');
+                dispatch(addMoves(possibleMoves));
                 break;
             case 'queen':
                 queenMoves();
                 clearTrash();
+                filterMoves('queen');
+                dispatch(addMoves(possibleMoves));
                 break;
             case 'king':
                 kingMoves()
                 clearTrash();
+                filterMoves('king');
+                dispatch(addMoves(possibleMoves));
                 break;
             case 'knight':
                 knightMoves();
                 clearTrash();
+                dispatch(addMoves(possibleMoves));
+                break;
+    }
+}
+    const click = () => {
+        console.log(moves);
+        console.log(squareData);
+        switch (props.pawn) {
+            case 'pawn':
+                finalMoves('pawn');
+                break;
+            case 'rook':
+                finalMoves('pawn');
+                break;
+            case 'bishop':
+                finalMoves('bishop');
+                break;
+            case 'queen':
+                finalMoves('queen');
+                break;
+            case 'king':
+                finalMoves('king');
+                break;
+            case 'knight':
+                finalMoves('knight');
                 break;
         }
-        console.log("Koncowe ruchy: "+possibleMoves);
+        console.log("Koncowe ruchy: " + possibleMoves);
     }
     //console.log(fetchData);
 

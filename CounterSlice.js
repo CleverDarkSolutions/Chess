@@ -78,15 +78,20 @@ export const CounterSlice = createSlice({
 
             
         ],
-        i: 0
+        i: 0,
+        globalMoves : []
     },
     reducers: {
         addField: (state, action) => {
             const i = action.payload;
             state.values[i.id] = i;
+        },
+        addMoves: (state, action) => {
+            const i = action.payload;
+            state.globalMoves = state.globalMoves.concat(i);
         }
     }
 });
 
-export const {addField} = CounterSlice.actions;
+export const {addField,addMoves} = CounterSlice.actions;
 export default CounterSlice.reducer;
