@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import {addMoves} from '../CounterSlice';
+import {addMoves, clearMoves} from '../CounterSlice';
 
 const Square = (props) => {
     //--------------CSS mostly---------------
@@ -67,6 +67,14 @@ const Square = (props) => {
                 squareData = fetchData[i];
         }
     })
+
+    const refreshTotalMoves = () => {
+        dispatch(clearMoves());
+        for(let i=0;i<63;i++){
+            console.log("Popoga");
+            finalMoves(fetchData[i].pawn);
+        }
+    }
 
     const pawnMoves = () => {
         // I've been thinking about implementing -1 and 1 constants for white and black pieces but 
@@ -154,12 +162,12 @@ const Square = (props) => {
 
                     let id = moves[i];
                     console.log(id);
-                    if (fetchData[id].posX != squareData.posX && fetchData[id].pawn != "") {
+                    if (fetchData[id].posX != squareData.posX && fetchData[id].pawn != "" && fetchData[id].colour != squareData.colour) { // takes
                         console.log("First if");
                         possibleMoves.push(id);
                     }
 
-                    if (fetchData[id].posX == squareData.posX && fetchData[id].pawn == "") {
+                    if (fetchData[id].posX == squareData.posX && fetchData[id].pawn == "") { // moves forward
                         console.log("Second if");
                         possibleMoves.push(id);
                     }
@@ -178,9 +186,9 @@ const Square = (props) => {
 
                     else {
                         for (let j = 0; j < blockingPawns.length; j++) {
-                            if (fetchData[id].posX - blockingPawns[j][0] == fetchData[id].posY - blockingPawns[j][1])
+                            if (fetchData[id].posX - blockingPawns[j][0] == fetchData[id].posY - blockingPawns[j][1]) // noice
                                 continue;
-                            else
+                            else if (fetchData[id].colour != squareData.colour)
                                 possibleMoves.push(id);
 
                         }
@@ -201,10 +209,10 @@ const Square = (props) => {
                     else {
                         for (let j = 0; j < blockingPawns.length; j++) {
                             if (fetchData[id].posX - blockingPawns[j][0] > 0 && fetchData[id].posY == blockingPawns[j][1])
-                                continue;
+                                continue; // vertical blocking
                             else if (fetchData[id].posY - blockingPawns[j][1] > 0 && fetchData[id].posX == blockingPawns[j][0])
-                                continue;
-                            else
+                                continue; // horizontal blocking
+                            else if (fetchData[id].colour != squareData.colour)
                                 possibleMoves.push(id);
 
                         }
@@ -228,7 +236,7 @@ const Square = (props) => {
                                 continue;
                             else if (fetchData[id].posX - blockingPawns[j][0] == fetchData[id].posY - blockingPawns[j][1])
                                 continue;
-                            else
+                            else if (fetchData[id].colour != squareData.colour)
                                 possibleMoves.push(id);
 
                         }
@@ -241,7 +249,7 @@ const Square = (props) => {
                     for(let j=0;j<fetchGlobalMoves.length;j++){
                         if(id == fetchGlobalMoves[j]) // preventing walking on checks by king
                             continue;
-                        else
+                        else if (fetchData[id].colour != squareData.colour)
                             possibleMoves.push(id);
                     }
                 }
@@ -290,6 +298,7 @@ const Square = (props) => {
     }
 }
     const click = () => {
+        //refreshTotalMoves();
         console.log(moves);
         console.log(squareData);
         switch (props.pawn) {
