@@ -79,7 +79,7 @@ export const CounterSlice = createSlice({
             
         ],
         i: 0,
-        globalMoves : []
+        globalMoves : [],
     },
     reducers: {
         addField: (state, action) => {
@@ -96,9 +96,17 @@ export const CounterSlice = createSlice({
         },
         clearMoves: (state) => {
             state.globalMoves = [];
+        },
+        addHover: (state, action) => {
+            const i = action.payload;
+            state.values[i].hover = true;
+        },
+        deleteHover: (state, action) =>{
+            const i = action.payload;
+            state.values[i].hover = false;
         }
     }
 });
 
-export const {addField,addMoves,setMoves,clearMoves} = CounterSlice.actions;
+export const {addField,addMoves,setMoves,clearMoves,addHover,deleteHover} = CounterSlice.actions;
 export default CounterSlice.reducer;

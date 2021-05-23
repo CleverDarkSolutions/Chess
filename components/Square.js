@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import {addMoves, clearMoves, setMoves} from '../CounterSlice';
+import {addHover, deleteHover, addMoves, clearMoves, setMoves} from '../CounterSlice';
 
 const Square = (props) => {
     //--------------CSS mostly---------------
@@ -15,6 +15,15 @@ const Square = (props) => {
         width: '5em',
         height: '5em',
         paddingTop: '1.5em'
+    }
+
+    let hoverStyle = {
+        opacity: '0.3',
+        height: '4em',
+        width: '4em',
+        position: 'relative',
+        top: '1.5em',
+        right: '0.5em'
     }
 
     if (props.background == "white") {
@@ -315,8 +324,20 @@ const Square = (props) => {
                 break;
     }
 }
+    const hoverMoves = (arr) => {
+        if(squareData.pawn != ""){ // preventing from activating on empty squares
+        for(let i=0;i<64;i++){
+            dispatch( deleteHover(i));
+        }
+
+        for(let i=0;i<arr.length;i++){
+            dispatch( addHover(arr[i]) );
+        }
+    }
+    }
+
     const click = () => {
-        refreshTotalMoves();
+        //refreshTotalMoves();
         console.log(moves);
         console.log(squareData);
         switch (props.pawn) {
@@ -339,14 +360,16 @@ const Square = (props) => {
                 finalMoves('knight');
                 break;
         }
+        hoverMoves(possibleMoves);
         console.log("Koncowe ruchy: " + possibleMoves);
     }
     //console.log(fetchData);
 
     return (
         <div style={divStyle} onClick={() => { click() }}>
-            {props.id}
+        {props.id}
             { notEmpty && <img style={imgStyle} src={`../../img/${props.colour + props.pawn}.png`}></img>}
+            { fetchData[props.id].hover && <img style={hoverStyle} src={`../../img/hover.png`}></img>}
         </div>
     )
 }
