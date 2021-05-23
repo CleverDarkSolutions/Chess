@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import {addMoves, clearMoves} from '../CounterSlice';
+import {addMoves, clearMoves, setMoves} from '../CounterSlice';
 
 const Square = (props) => {
     //--------------CSS mostly---------------
@@ -50,6 +50,10 @@ const Square = (props) => {
         return 'error';
     }
 
+    const onlyUnique = (value, index, self) => {
+        return self.indexOf(value) === index;
+    }
+
     const clearTrash = () => {
         for (let p = 0; p < 5; p++) { // this is weird
             for (let i = 0; i < moves.length; i++) {
@@ -73,6 +77,10 @@ const Square = (props) => {
         for(let i=0;i<63;i++){
             console.log("Popoga");
             finalMoves(fetchData[i].pawn);
+            let arr = fetchGlobalMoves;
+            let filtered = arr.filter(onlyUnique);
+            console.log(filtered);
+            dispatch(setMoves(filtered));
         }
     }
 
@@ -217,8 +225,8 @@ const Square = (props) => {
 
                         }
                     }
-
                 }
+                break;
             case "queen":
                 for (let i = 0; i < moves.length; i++) {
                     let blockingPawns = []; // 0 = x, 1 = y
@@ -243,6 +251,7 @@ const Square = (props) => {
                     }
 
                 }
+                break;
             case "king":
                 for (let i = 0; i < moves.length; i++) {
                     let id = moves[i];
@@ -253,9 +262,17 @@ const Square = (props) => {
                             possibleMoves.push(id);
                     }
                 }
-            
+                break;
+            case "knight":
+                for(let i=0; i < moves.length; i++) {
+                    let id = moves[i];
+                    if(fetchData[id].colour != squareData.colour)
+                        possibleMoves.push(id);
+                }
+                break; 
 
         }
+        possibleMoves = possibleMoves.filter(onlyUnique); // finally works
         return possibleMoves;
     }
     const finalMoves = (pawn) => {
@@ -293,12 +310,13 @@ const Square = (props) => {
             case 'knight':
                 knightMoves();
                 clearTrash();
+                filterMoves('knight');
                 dispatch(addMoves(possibleMoves));
                 break;
     }
 }
     const click = () => {
-        //refreshTotalMoves();
+        refreshTotalMoves();
         console.log(moves);
         console.log(squareData);
         switch (props.pawn) {
