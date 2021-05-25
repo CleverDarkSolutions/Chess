@@ -80,6 +80,7 @@ export const CounterSlice = createSlice({
         ],
         i: 0,
         globalMoves : [],
+        stake : []
     },
     reducers: {
         addField: (state, action) => {
@@ -104,9 +105,24 @@ export const CounterSlice = createSlice({
         deleteHover: (state, action) =>{
             const i = action.payload;
             state.values[i].hover = false;
+        },
+        unsetPawn: (state,action) => {
+            const i = action.payload;
+            state.values[i].pawn = "";
+        },
+        setPawn: (state,action) => {
+            const i = action.payload;
+            state.values[i.id] = i.pawn
+        },
+        pushToStake: (state,action) => {
+            const i = action.payload;
+            state.stake.push(i);
+        },
+        clearStake: (state) => {
+            state.stake = [];
         }
     }
 });
 
-export const {addField,addMoves,setMoves,clearMoves,addHover,deleteHover} = CounterSlice.actions;
+export const {addField,addMoves,setMoves,clearMoves,addHover,deleteHover,unsetPawn, setPawn, pushToStake, clearStake} = CounterSlice.actions;
 export default CounterSlice.reducer;

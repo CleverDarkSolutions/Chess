@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import {addHover, deleteHover, addMoves, clearMoves, setMoves} from '../CounterSlice';
+import { addHover, deleteHover, addMoves, clearMoves, setMoves, unsetPawn, setPawn, pushToStake, clearStake } from '../CounterSlice';
 
 const Square = (props) => {
     //--------------CSS mostly---------------
@@ -45,6 +45,7 @@ const Square = (props) => {
     //-----------moves-----------------------
     const fetchData = useSelector(state => state.counter.values); // find a match between square component and redux
     const fetchGlobalMoves = useSelector(state => state.counter.globalMoves); // for king's sake
+    let itemsFromStake = useSelector(state => state.counter.stake);
     let squareData; // current square data
     let moves = []; // initial moves
     let possibleMoves = []; // after filtering
@@ -83,7 +84,7 @@ const Square = (props) => {
 
     const refreshTotalMoves = () => {
         dispatch(clearMoves());
-        for(let i=0;i<63;i++){
+        for (let i = 0; i < 63; i++) {
             console.log("Popoga");
             finalMoves(fetchData[i].pawn);
             let arr = fetchGlobalMoves;
@@ -264,8 +265,8 @@ const Square = (props) => {
             case "king":
                 for (let i = 0; i < moves.length; i++) {
                     let id = moves[i];
-                    for(let j=0;j<fetchGlobalMoves.length;j++){
-                        if(id == fetchGlobalMoves[j]) // preventing walking on checks by king
+                    for (let j = 0; j < fetchGlobalMoves.length; j++) {
+                        if (id == fetchGlobalMoves[j]) // preventing walking on checks by king
                             continue;
                         else if (fetchData[id].colour != squareData.colour)
                             possibleMoves.push(id);
@@ -273,12 +274,12 @@ const Square = (props) => {
                 }
                 break;
             case "knight":
-                for(let i=0; i < moves.length; i++) {
+                for (let i = 0; i < moves.length; i++) {
                     let id = moves[i];
-                    if(fetchData[id].colour != squareData.colour)
+                    if (fetchData[id].colour != squareData.colour)
                         possibleMoves.push(id);
                 }
-                break; 
+                break;
 
         }
         possibleMoves = possibleMoves.filter(onlyUnique); // finally works
@@ -290,7 +291,7 @@ const Square = (props) => {
                 pawnMoves();
                 clearTrash();
                 filterMoves('pawn');
-                dispatch(addMoves(possibleMoves) );
+                dispatch(addMoves(possibleMoves));
                 break;
             case 'rook':
                 rookMoves();
@@ -322,52 +323,65 @@ const Square = (props) => {
                 filterMoves('knight');
                 dispatch(addMoves(possibleMoves));
                 break;
+        }
     }
-}
     const hoverMoves = (arr) => {
-        if(squareData.pawn != ""){ // preventing from activating on empty squares
-        for(let i=0;i<64;i++){
-            dispatch( deleteHover(i));
-        }
+        if (squareData.pawn != "") { // preventing from activating on empty squares
+            for (let i = 0; i < 64; i++) {
+                dispatch(deleteHover(i));
+            }
 
-        for(let i=0;i<arr.length;i++){
-            dispatch( addHover(arr[i]) );
+            for (let i = 0; i < arr.length; i++) {
+                dispatch(addHover(arr[i]));
+            }
         }
     }
+
+    const movePiece = (from, to) => { // from = squareData
+        dispatch(unsetPawn(from.id));
+        dispatch(setPawn({ id: to.id, pawn: from.pawn }));
+        for (let i = 0; i < 64; i++)
+            dispatch(deleteHover(i));
     }
 
     const click = () => {
         //refreshTotalMoves();
         console.log(moves);
         console.log(squareData);
-        switch (props.pawn) {
-            case 'pawn':
-                finalMoves('pawn');
-                break;
-            case 'rook':
-                finalMoves('pawn');
-                break;
-            case 'bishop':
-                finalMoves('bishop');
-                break;
-            case 'queen':
-                finalMoves('queen');
-                break;
-            case 'king':
-                finalMoves('king');
-                break;
-            case 'knight':
-                finalMoves('knight');
-                break;
+    
+        if (squareData.pawn != "") {
+            switch (squareData.pawn) {
+                case 'pawn':
+                    finalMoves('pawn');
+                    break;
+                case 'rook':
+                    finalMoves('rook');
+                    break;
+                case 'bishop':
+                    finalMoves('bishop');
+                    break;
+                case 'queen':
+                    finalMoves('queen');
+                    break;
+                case 'king':
+                    finalMoves('king');
+                    break;
+                case 'knight':
+                    finalMoves('knight');
+                    break;
+            }
+            hoverMoves(possibleMoves);
+            console.log("Koncowe ruchy: " + possibleMoves);
+            console.log(itemsFromStake.length);
         }
-        hoverMoves(possibleMoves);
-        console.log("Koncowe ruchy: " + possibleMoves);
+        
     }
+
     //console.log(fetchData);
 
     return (
         <div style={divStyle} onClick={() => { click() }}>
-        {props.id}
+            {props.id}
             { notEmpty && <img style={imgStyle} src={`../../img/${props.colour + props.pawn}.png`}></img>}
             { fetchData[props.id].hover && <img style={hoverStyle} src={`../../img/hover.png`}></img>}
         </div>
