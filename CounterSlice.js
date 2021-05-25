@@ -109,6 +109,7 @@ export const CounterSlice = createSlice({
         unsetPawn: (state,action) => {
             const i = action.payload;
             state.values[i].pawn = "";
+            state.values[i].colour = "";
         },
         setPawn: (state,action) => {
             const i = action.payload;
