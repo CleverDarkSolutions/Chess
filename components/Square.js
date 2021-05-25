@@ -1,15 +1,11 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { addHover, deleteHover, addMoves, clearMoves, setMoves, unsetPawn, setPawn, pushToStake, clearStake } from '../CounterSlice';
+import { addHover, deleteHover, addMoves, clearMoves, setMoves, unsetPawn, setPawn, setLast, addLastMoves } from '../CounterSlice';
 
 const Square = (props) => {
     //--------------CSS mostly---------------
     let dispatch = useDispatch();
     let divStyle;
-    let notEmpty;
-
-    if (props.colour && props.pawn)
-        notEmpty = true;
 
     let imgStyle = {
         width: '5em',
@@ -45,7 +41,11 @@ const Square = (props) => {
     //-----------moves-----------------------
     const fetchData = useSelector(state => state.counter.values); // find a match between square component and redux
     const fetchGlobalMoves = useSelector(state => state.counter.globalMoves); // for king's sake
+    const fetchLast = useSelector(state => state.counter.last);
     let itemsFromStake = useSelector(state => state.counter.stake);
+    let notEmpty;
+    if (fetchData[props.id].pawn != "")
+        notEmpty = true;
     let squareData; // current square data
     let moves = []; // initial moves
     let possibleMoves = []; // after filtering
@@ -339,16 +339,19 @@ const Square = (props) => {
 
     const movePiece = (from, to) => { // from = squareData
         dispatch(unsetPawn(from.id));
-        dispatch(setPawn({ id: to.id, pawn: from.pawn }));
+        dispatch(setPawn({ id: to.id, pawn: from.pawn, colour: from.colour }));
+
         for (let i = 0; i < 64; i++)
             dispatch(deleteHover(i));
+        possibleMoves = [];
     }
 
     const click = () => {
+        console.log(fetchLast);
         //refreshTotalMoves();
         console.log(moves);
         console.log(squareData);
-    
+        dispatch(setLast(squareData));
         if (squareData.pawn != "") {
             switch (squareData.pawn) {
                 case 'pawn':
@@ -372,18 +375,30 @@ const Square = (props) => {
             }
             hoverMoves(possibleMoves);
             console.log("Koncowe ruchy: " + possibleMoves);
-            console.log(itemsFromStake.length);
+            dispatch( addLastMoves(possibleMoves));
+        }
+        else {
+            if(fetchLast != ""){
+                if(fetchLast.pawn != ""){
+                    if(fetchLast.moves.includes(squareData.id))
+                        movePiece(fetchLast ,squareData);
+                    else{
+                        for (let i = 0; i < 64; i++) {
+                            dispatch(deleteHover(i));
+                        }
+                    }
+                    console.log(squareData.id);
+                }
+            }
         }
         
     }
 
-    //console.log(fetchData);
-
     return (
         <div style={divStyle} onClick={() => { click() }}>
             {props.id}
-            { notEmpty && <img style={imgStyle} src={`../../img/${props.colour + props.pawn}.png`}></img>}
-            { fetchData[props.id].hover && <img style={hoverStyle} src={`../../img/hover.png`}></img>}
+            { notEmpty && <img style={imgStyle} src={`../../img/${fetchData[props.id].colour + fetchData[props.id].pawn}.png`}></img>}
+            { fetchData[props.id].hover  && <img style={hoverStyle} src={`../../img/hover.png`}></img>}
         </div>
     )
 }
