@@ -84,15 +84,22 @@ const Square = (props) => {
     })
 
     const refreshTotalMoves = () => {
+        /*
         dispatch(clearMoves());
+        let arr = [];
+        let filtered;
         for (let i = 0; i < 63; i++) {
-            console.log("Popoga");
             finalMoves(fetchData[i].pawn);
-            let arr = fetchGlobalMoves;
-            let filtered = arr.filter(onlyUnique);
-            console.log(filtered);
-            dispatch(setMoves(filtered));
+            arr.concat(fetchGlobalMoves);
         }
+        console.log(arr);
+        filtered = arr.filter(onlyUnique);
+        dispatch(setMoves(filtered));
+        */
+
+        dispatch(clearMoves());
+
+
     }
 
     const pawnMoves = () => {
@@ -182,14 +189,14 @@ const Square = (props) => {
                 for (let i = 0; i < moves.length; i++) {
 
                     let id = moves[i];
-                    console.log(id);
+                    //console.log(id);
                     if (fetchData[id].posX != squareData.posX && fetchData[id].pawn != "" && fetchData[id].colour != squareData.colour) { // takes
-                        console.log("First if");
+                        //console.log("First if");
                         possibleMoves.push(id);
                     }
 
                     if (fetchData[id].posX == squareData.posX && fetchData[id].pawn == "") { // moves forward
-                        console.log("Second if");
+                       // console.log("Second if");
                         possibleMoves.push(id);
                     }
 
@@ -202,13 +209,13 @@ const Square = (props) => {
                     let id = moves[i];
                     if (fetchData[id].pawn != " ") { // find blocking pawns
                         blockingPawns.push([fetchData[id].posX, fetchData[id].posY]);
-                        console.log(blockingPawns);
+                        //console.log(blockingPawns);
                     }
 
                     else {
                         for (let j = 0; j < blockingPawns.length; j++) {
                             if (fetchData[id].posX - blockingPawns[j][0] == fetchData[id].posY - blockingPawns[j][1]){
-                                console.log("Bishop first if");
+                                //console.log("Bishop first if");
                                 continue;
                             }
                             else if (fetchData[id].colour != squareData.colour)
@@ -285,7 +292,7 @@ const Square = (props) => {
                 break;
 
         }
-        //dispatch(addBlockingPawns({id,blockingPawns}))
+        dispatch(addBlockingPawns({id,blockingPawns}))
         possibleMoves = possibleMoves.filter(onlyUnique); // finally works
         return possibleMoves;
     }
@@ -351,10 +358,6 @@ const Square = (props) => {
     }
 
     const click = () => {
-        console.log(fetchLast);
-        //refreshTotalMoves();
-        console.log(moves);
-        console.log(squareData);
         dispatch(setLast(squareData));
         if (squareData.pawn != "") {
             switch (squareData.pawn) {
