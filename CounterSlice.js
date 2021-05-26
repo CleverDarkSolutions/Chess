@@ -80,7 +80,8 @@ export const CounterSlice = createSlice({
         ],
         i: 0,
         globalMoves : [],
-        last : ""
+        last : "",
+        blockedMoves : [] 
     },
     reducers: {
         addField: (state, action) => {
@@ -123,9 +124,13 @@ export const CounterSlice = createSlice({
         addLastMoves: (state,action) => {
             const i = action.payload;
             state.last.moves = i;
+        },
+        addBlockingPawns: (state,action) => {
+            const i = action.payload;
+            state.blockedMoves.push(i); 
         }
     }
 });
 
-export const {addField,addMoves,setMoves,clearMoves,addHover,deleteHover,unsetPawn, setPawn, setLast, addLastMoves} = CounterSlice.actions;
+export const {addField,addMoves,setMoves,clearMoves,addHover,deleteHover,unsetPawn, setPawn, setLast, addLastMoves,addBlockingPawns} = CounterSlice.actions;
 export default CounterSlice.reducer;

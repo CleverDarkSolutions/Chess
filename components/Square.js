@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { addHover, deleteHover, addMoves, clearMoves, setMoves, unsetPawn, setPawn, setLast, addLastMoves } from '../CounterSlice';
+import { addHover, deleteHover, addMoves, clearMoves, setMoves, unsetPawn, setPawn, setLast, addLastMoves, addBlockingPawns } from '../CounterSlice';
 
 const Square = (props) => {
     //--------------CSS mostly---------------
@@ -42,7 +42,8 @@ const Square = (props) => {
     const fetchData = useSelector(state => state.counter.values); // find a match between square component and redux
     const fetchGlobalMoves = useSelector(state => state.counter.globalMoves); // for king's sake
     const fetchLast = useSelector(state => state.counter.last);
-    let itemsFromStake = useSelector(state => state.counter.stake);
+    const fetchBlockingPawns = useSelector(state => state.counter.blockingPawns);
+    const id = props.id;
     let notEmpty;
     if (fetchData[props.id].pawn != "")
         notEmpty = true;
@@ -173,7 +174,9 @@ const Square = (props) => {
     }
 
     //---------------------Filter moves------------------------//
+
     const filterMoves = (pawn) => {
+        let blockingPawns = []; // 0 = x, 1 = y
         switch (pawn) {
             case "pawn":
                 for (let i = 0; i < moves.length; i++) {
@@ -195,17 +198,19 @@ const Square = (props) => {
 
             case "bishop":
                 for (let i = 0; i < moves.length; i++) {
-                    let blockingPawns = []; // 0 = x, 1 = y
 
                     let id = moves[i];
                     if (fetchData[id].pawn != " ") { // find blocking pawns
                         blockingPawns.push([fetchData[id].posX, fetchData[id].posY]);
+                        console.log(blockingPawns);
                     }
 
                     else {
                         for (let j = 0; j < blockingPawns.length; j++) {
-                            if (fetchData[id].posX - blockingPawns[j][0] == fetchData[id].posY - blockingPawns[j][1]) // noice
+                            if (fetchData[id].posX - blockingPawns[j][0] == fetchData[id].posY - blockingPawns[j][1]){
+                                console.log("Bishop first if");
                                 continue;
+                            }
                             else if (fetchData[id].colour != squareData.colour)
                                 possibleMoves.push(id);
 
@@ -217,7 +222,6 @@ const Square = (props) => {
 
             case "rook":
                 for (let i = 0; i < moves.length; i++) {
-                    let blockingPawns = []; // 0 = x, 1 = y
 
                     let id = moves[i];
                     if (fetchData[id].pawn != " ") { // find blocking pawns
@@ -239,7 +243,6 @@ const Square = (props) => {
                 break;
             case "queen":
                 for (let i = 0; i < moves.length; i++) {
-                    let blockingPawns = []; // 0 = x, 1 = y
 
                     let id = moves[i];
                     if (fetchData[id].pawn != " ") { // find blocking pawns
@@ -282,6 +285,7 @@ const Square = (props) => {
                 break;
 
         }
+        //dispatch(addBlockingPawns({id,blockingPawns}))
         possibleMoves = possibleMoves.filter(onlyUnique); // finally works
         return possibleMoves;
     }
