@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { addHover, deleteHover, addMoves, clearMoves, unsetPawn, setPawn, setLast, addLastMoves, addBlockingPawns, changeTurn } from '../CounterSlice';
+import { addHover, deleteHover, addMoves, clearMoves, unsetPawn, setPawn, setLast, addLastMoves, addBlockingPawns, setTurnBlack, setTurnWhite } from '../CounterSlice';
 
 const Square = (props) => {
     const fetchData = useSelector(state => state.counter.values); // find a match between square component and redux
@@ -377,13 +377,19 @@ const Square = (props) => {
         for (let i = 0; i < 64; i++)
             dispatch(deleteHover(i));
         possibleMoves = [];
+        if(from.colour == "white"){
+            dispatch(setTurnBlack());
+        }
+        if(from.colour == "black"){
+            dispatch(setTurnWhite());
+        }
     }
 
     const click = () => {
         dispatch(setLast(squareData));
 
         if ((squareData.colour == 'white' && fetchLast.colour == 'black') || squareData.colour == 'black' && fetchLast.colour == 'white') {
-            if (fetchLast.moves) {
+            if (fetchLast.moves) { // preventing crash
                 if (fetchLast.moves.includes(squareData.id))
                     movePiece(fetchLast, squareData);
             }
@@ -416,7 +422,7 @@ const Square = (props) => {
 
         else {
             if (fetchLast != "") {
-                if (fetchLast.pawn != "" && fetchLast.moves) {
+                if (fetchLast.pawn != "" && fetchLast.moves) { // preventing crash
                     if (fetchLast.moves.includes(squareData.id))
                         movePiece(fetchLast, squareData);
                     else {
