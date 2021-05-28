@@ -1,8 +1,14 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { addHover, deleteHover, addMoves, clearMoves, setMoves, unsetPawn, setPawn, setLast, addLastMoves, addBlockingPawns } from '../CounterSlice';
+import { addHover, deleteHover, addMoves, clearMoves, unsetPawn, setPawn, setLast, addLastMoves, addBlockingPawns, changeTurn } from '../CounterSlice';
 
 const Square = (props) => {
+    const fetchData = useSelector(state => state.counter.values); // find a match between square component and redux
+    const fetchGlobalMoves = useSelector(state => state.counter.globalMoves); // for king's sake
+    const fetchLast = useSelector(state => state.counter.last);
+    const fetchBlockingPawns = useSelector(state => state.counter.blockingPawns);
+    const fetchTurn = useSelector(state => state.counter.whoseTurn);
+    const id = props.id;
     //--------------CSS mostly---------------
     let dispatch = useDispatch();
     let divStyle;
@@ -23,27 +29,43 @@ const Square = (props) => {
     }
 
     if (props.background == "white") {
-        divStyle = {
-            width: '7em',
-            height: '7em',
-            background: '#FFEBCD',
-            float: 'left'
+        if (fetchData[id].hover) {
+            divStyle = {
+                width: '7em',
+                height: '7em',
+                background: '#ffdf8f',
+                float: 'left',
+            }
+        }
+        else {
+            divStyle = {
+                width: '7em',
+                height: '7em',
+                background: '#FFEBCD',
+                float: 'left'
+            }
         }
     }
+
     if (props.background == "black") {
-        divStyle = {
-            width: '7em',
-            height: '7em',
-            background: '#D2691E',
-            float: 'left'
+        if (fetchData[id].hover) {
+            divStyle = {
+                width: '7em',
+                height: '7em',
+                background: '#ffdf8f',
+                float: 'left'
+            }
+        }
+        else {
+            divStyle = {
+                width: '7em',
+                height: '7em',
+                background: '#D2691E',
+                float: 'left',
+            }
         }
     }
     //-----------moves-----------------------
-    const fetchData = useSelector(state => state.counter.values); // find a match between square component and redux
-    const fetchGlobalMoves = useSelector(state => state.counter.globalMoves); // for king's sake
-    const fetchLast = useSelector(state => state.counter.last);
-    const fetchBlockingPawns = useSelector(state => state.counter.blockingPawns);
-    const id = props.id;
     let notEmpty;
     if (fetchData[props.id].pawn != "")
         notEmpty = true;
@@ -196,7 +218,7 @@ const Square = (props) => {
                     }
 
                     if (fetchData[id].posX == squareData.posX && fetchData[id].pawn == "") { // moves forward
-                       // console.log("Second if");
+                        // console.log("Second if");
                         possibleMoves.push(id);
                     }
 
@@ -214,7 +236,7 @@ const Square = (props) => {
 
                     else {
                         for (let j = 0; j < blockingPawns.length; j++) {
-                            if (fetchData[id].posX - blockingPawns[j][0] == fetchData[id].posY - blockingPawns[j][1]){
+                            if (fetchData[id].posX - blockingPawns[j][0] == fetchData[id].posY - blockingPawns[j][1]) {
                                 //console.log("Bishop first if");
                                 continue;
                             }
@@ -292,7 +314,7 @@ const Square = (props) => {
                 break;
 
         }
-        dispatch(addBlockingPawns({id,blockingPawns}))
+        dispatch(addBlockingPawns({ id, blockingPawns }))
         possibleMoves = possibleMoves.filter(onlyUnique); // finally works
         return possibleMoves;
     }
@@ -359,7 +381,14 @@ const Square = (props) => {
 
     const click = () => {
         dispatch(setLast(squareData));
-        if (squareData.pawn != "") {
+
+        if ((squareData.colour == 'white' && fetchLast.colour == 'black') || squareData.colour == 'black' && fetchLast.colour == 'white') {
+            if (fetchLast.moves) {
+                if (fetchLast.moves.includes(squareData.id))
+                    movePiece(fetchLast, squareData);
+            }
+        }
+        else if (squareData.pawn != "") {
             switch (squareData.pawn) {
                 case 'pawn':
                     finalMoves('pawn');
@@ -382,14 +411,15 @@ const Square = (props) => {
             }
             hoverMoves(possibleMoves);
             console.log("Koncowe ruchy: " + possibleMoves);
-            dispatch( addLastMoves(possibleMoves));
+            dispatch(addLastMoves(possibleMoves));
         }
+
         else {
-            if(fetchLast != ""){
-                if(fetchLast.pawn != ""){
-                    if(fetchLast.moves.includes(squareData.id))
-                        movePiece(fetchLast ,squareData);
-                    else{
+            if (fetchLast != "") {
+                if (fetchLast.pawn != "" && fetchLast.moves) {
+                    if (fetchLast.moves.includes(squareData.id))
+                        movePiece(fetchLast, squareData);
+                    else {
                         for (let i = 0; i < 64; i++) {
                             dispatch(deleteHover(i));
                         }
@@ -398,14 +428,15 @@ const Square = (props) => {
                 }
             }
         }
-        
+
+
     }
 
     return (
         <div style={divStyle} onClick={() => { click() }}>
             {props.id}
             { notEmpty && <img style={imgStyle} src={`../../img/${fetchData[props.id].colour + fetchData[props.id].pawn}.png`}></img>}
-            { fetchData[props.id].hover  && <img style={hoverStyle} src={`../../img/hover.png`}></img>}
+
         </div>
     )
 }

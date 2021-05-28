@@ -79,6 +79,7 @@ export const CounterSlice = createSlice({
             
         ],
         i: 0,
+        whoseTurn : 'white',
         globalMoves : [],
         last : "",
         blockedMoves : [] 
@@ -128,9 +129,15 @@ export const CounterSlice = createSlice({
         addBlockingPawns: (state,action) => {
             const i = action.payload;
             state.blockedMoves.push(i); 
+        },
+        changeTurn : (state) => {
+            if(state.whoseTurn == "white")
+                state.whoseTurn = 'black';
+            if(state.whoseTurn == "black");
+                state.whoseTurn = 'white';
         }
     }
 });
 
-export const {addField,addMoves,setMoves,clearMoves,addHover,deleteHover,unsetPawn, setPawn, setLast, addLastMoves,addBlockingPawns} = CounterSlice.actions;
+export const {addField,addMoves,setMoves,clearMoves,addHover,deleteHover,unsetPawn, setPawn, setLast, addLastMoves,addBlockingPawns,changeTurn} = CounterSlice.actions;
 export default CounterSlice.reducer;
