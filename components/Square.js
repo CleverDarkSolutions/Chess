@@ -1,12 +1,12 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { addHover, deleteHover, addMoves, clearMoves, unsetPawn, setPawn, setLast, addLastMoves, addBlockingPawns, setTurnBlack, setTurnWhite } from '../CounterSlice';
+import { addHover, deleteHover, addMoves, clearMoves, unsetPawn, setPawn, setLast, addLastMoves, addBlockedMoves, setTurnBlack, setTurnWhite } from '../CounterSlice';
 
 const Square = (props) => {
     const fetchData = useSelector(state => state.counter.values); // find a match between square component and redux
     const fetchGlobalMoves = useSelector(state => state.counter.globalMoves); // for king's sake
     const fetchLast = useSelector(state => state.counter.last);
-    const fetchBlockingPawns = useSelector(state => state.counter.blockingPawns);
+    const fetchBlockedMoves = useSelector(state => state.counter.blockedMoves);
     const fetchTurn = useSelector(state => state.counter.whoseTurn);
     const id = props.id;
     //--------------CSS mostly---------------
@@ -205,22 +205,41 @@ const Square = (props) => {
     //---------------------Filter moves------------------------//
 
     const filterMoves = (pawn) => {
-        let blockingPawns = []; // 0 = x, 1 = y
+        let blockedMoves = []; // 0 = x, 1 = y
         switch (pawn) {
             case "pawn":
+                let ifBlocked = false;
                 for (let i = 0; i < moves.length; i++) {
 
                     let id = moves[i];
                     //console.log(id);
-                    if (fetchData[id].posX != squareData.posX && fetchData[id].pawn != "" && fetchData[id].colour != squareData.colour) { // takes
+
+                    if( (fetchData[id].posY == 4 || fetchData[id].posY == 5) && fetchData[id].posX == squareData.posX ){
+                        if(squareData.colour == "white"){
+                            let square = findSquare(fetchData[id].posX, fetchData[id].posY - 1);
+                            if(fetchData[square].pawn != ""){
+                                ifBlocked = true;
+                            }
+                        }
+
+                        else if(squareData.colour == "black"){
+                            let square = findSquare(fetchData[id].posX, fetchData[id].posY + 1);
+                            if (fetchData[square].pawn != ""){
+                                ifBlocked = true;
+                            }
+                        }
+                    }
+                    console.log(ifBlocked);
+                    if (fetchData[id].posX == squareData.posX && fetchData[id].pawn == "" && ifBlocked == false) { // moves forward
+                        // console.log("Second if");
+                        possibleMoves.push(id);
+                    }
+                
+                    else if (fetchData[id].posX != squareData.posX && fetchData[id].pawn != "" && fetchData[id].colour != squareData.colour) { // takes
                         //console.log("First if");
                         possibleMoves.push(id);
                     }
 
-                    if (fetchData[id].posX == squareData.posX && fetchData[id].pawn == "") { // moves forward
-                        // console.log("Second if");
-                        possibleMoves.push(id);
-                    }
 
                 }
                 break;
@@ -230,13 +249,12 @@ const Square = (props) => {
 
                     let id = moves[i];
                     if (fetchData[id].pawn != " ") { // find blocking pawns
-                        blockingPawns.push([fetchData[id].posX, fetchData[id].posY]);
-                        //console.log(blockingPawns);
+                        blockedMoves.push([fetchData[id].posX, fetchData[id].posY, id]);
                     }
 
                     else {
-                        for (let j = 0; j < blockingPawns.length; j++) {
-                            if (fetchData[id].posX - blockingPawns[j][0] == fetchData[id].posY - blockingPawns[j][1]) {
+                        for (let j = 0; j < blockedMoves.length; j++) {
+                            if (fetchData[id].posX - blockedMoves[j][0] == fetchData[id].posY - blockedMoves[j][1]) {
                                 //console.log("Bishop first if");
                                 continue;
                             }
@@ -254,14 +272,14 @@ const Square = (props) => {
 
                     let id = moves[i];
                     if (fetchData[id].pawn != " ") { // find blocking pawns
-                        blockingPawns.push([fetchData[id].posX, fetchData[id].posY]);
+                        blockedMoves.push([fetchData[id].posX, fetchData[id].posY, id]);
                     }
 
                     else {
-                        for (let j = 0; j < blockingPawns.length; j++) {
-                            if (fetchData[id].posX - blockingPawns[j][0] > 0 && fetchData[id].posY == blockingPawns[j][1])
+                        for (let j = 0; j < blockedMoves.length; j++) {
+                            if (fetchData[id].posX - blockedMoves[j][0] > 0 && fetchData[id].posY == blockedMoves[j][1])
                                 continue; // vertical blocking
-                            else if (fetchData[id].posY - blockingPawns[j][1] > 0 && fetchData[id].posX == blockingPawns[j][0])
+                            else if (fetchData[id].posY - blockedMoves[j][1] > 0 && fetchData[id].posX == blockedMoves[j][0])
                                 continue; // horizontal blocking
                             else if (fetchData[id].colour != squareData.colour)
                                 possibleMoves.push(id);
@@ -275,16 +293,16 @@ const Square = (props) => {
 
                     let id = moves[i];
                     if (fetchData[id].pawn != " ") { // find blocking pawns
-                        blockingPawns.push([fetchData[id].posX, fetchData[id].posY]);
+                        blockedMoves.push([fetchData[id].posX, fetchData[id].posY, id]);
                     }
 
                     else {
-                        for (let j = 0; j < blockingPawns.length; j++) {
-                            if (fetchData[id].posX - blockingPawns[j][0] > 0 && fetchData[id].posY == blockingPawns[j][1])
+                        for (let j = 0; j < blockedMoves.length; j++) {
+                            if (fetchData[id].posX - blockedMoves[j][0] > 0 && fetchData[id].posY == blockedMoves[j][1])
                                 continue;
-                            else if (fetchData[id].posY - blockingPawns[j][1] > 0 && fetchData[id].posX == blockingPawns[j][0])
+                            else if (fetchData[id].posY - blockedMoves[j][1] > 0 && fetchData[id].posX == blockedMoves[j][0])
                                 continue;
-                            else if (fetchData[id].posX - blockingPawns[j][0] == fetchData[id].posY - blockingPawns[j][1])
+                            else if (fetchData[id].posX - blockedMoves[j][0] == fetchData[id].posY - blockedMoves[j][1])
                                 continue;
                             else if (fetchData[id].colour != squareData.colour)
                                 possibleMoves.push(id);
@@ -314,7 +332,9 @@ const Square = (props) => {
                 break;
 
         }
-        dispatch(addBlockingPawns({ id, blockingPawns }))
+        if(blockedMoves.length > 0)
+            dispatch(addBlockedMoves({ id, blockedMoves }))
+
         possibleMoves = possibleMoves.filter(onlyUnique); // finally works
         return possibleMoves;
     }
@@ -386,6 +406,7 @@ const Square = (props) => {
     }
 
     const click = () => {
+
         dispatch(setLast(squareData));
 
         if ((squareData.colour == 'white' && fetchLast.colour == 'black') || squareData.colour == 'black' && fetchLast.colour == 'white') {
@@ -394,7 +415,11 @@ const Square = (props) => {
                     movePiece(fetchLast, squareData);
             }
         }
-        else if (squareData.pawn != "") {
+        else if (squareData.pawn != "" && squareData.colour != fetchTurn){
+            for (let i = 0; i < 64; i++)
+                dispatch(deleteHover(i));
+        }
+        else if (squareData.pawn != "" && squareData.colour == fetchTurn) {
             switch (squareData.pawn) {
                 case 'pawn':
                     finalMoves('pawn');

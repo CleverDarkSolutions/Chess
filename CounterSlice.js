@@ -125,7 +125,7 @@ export const CounterSlice = createSlice({
             const i = action.payload;
             state.last.moves = i;
         },
-        addBlockingPawns: (state,action) => {
+        addBlockedMoves: (state,action) => {
             const i = action.payload;
             state.blockedMoves.push(i); 
         },
@@ -138,5 +138,5 @@ export const CounterSlice = createSlice({
     }
 });
 
-export const {addField,addMoves,setMoves,clearMoves,addHover,deleteHover,unsetPawn, setPawn, setLast, addLastMoves,addBlockingPawns,setTurnBlack,setTurnWhite} = CounterSlice.actions;
+export const {addField,addMoves,setMoves,clearMoves,addHover,deleteHover,unsetPawn, setPawn, setLast, addLastMoves,addBlockedMoves,setTurnBlack,setTurnWhite} = CounterSlice.actions;
 export default CounterSlice.reducer;
