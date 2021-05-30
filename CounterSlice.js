@@ -127,7 +127,7 @@ export const CounterSlice = createSlice({
         },
         addBlockedMoves: (state,action) => {
             const i = action.payload;
-            state.blockedMoves.push(i); 
+            state.blockedMoves = i; 
         },
         setTurnWhite : (state) => {
             state.whoseTurn = "white";
